@@ -1,0 +1,11 @@
+[package]
+name = "backtrace-string"
+description = "Returns a backtrace as a string."
+version = "0.1.0"
+authors = ["DAC GmbH"]
+edition = "2018"
+readme = "README.md"
+
+[dependencies]
+backtrace = "0.3.32"
+rustc-demangle = "0.1.15"
