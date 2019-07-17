@@ -82,10 +82,4 @@ Backtrace:
           at /rustc/a53f9df32fbb0b5f4382caaad8f1a46f36ea887c/src/libstd/rt.rs:64
   12: main
           at address 0x559f6430a8e9
-  13: __libc_start_main
-          at address 0x7ff262be3ee2
-  14: _start
-          at address 0x559f6430a18d
-  15: <unknown>
-          at <unknown>
 ```

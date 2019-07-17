@@ -120,7 +120,11 @@ fn filter_frames<'a>(frames: &'a [BacktraceFrame]) -> impl Iterator<Item = &'a B
         .enumerate()
         .rev()
         .find(|(_, frame)| {
-            frame_contains_symbol(frame, |sym| sym.contains("__rust_begin_short_backtrace"))
+            frame_contains_symbol(frame, |sym| {
+                sym.contains("__rust_begin_short_backtrace") ||
+                // Sometimes the rust marker is not emitted.
+                sym == "__libc_start_main"
+            })
         })
         .map(|(i, _)| i);
 
