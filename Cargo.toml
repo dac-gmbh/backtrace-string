@@ -2,7 +2,7 @@
 name = "backtrace-string"
 description = "Returns a backtrace as a string."
 version = "0.1.0"
-authors = ["DAC GmbH"]
+authors = ["Jonas Schievink <jonasschievink@gmail.com>", "Philipp Korber <p.korber@dac.eu>"]
 edition = "2018"
 readme = "README.md"
 

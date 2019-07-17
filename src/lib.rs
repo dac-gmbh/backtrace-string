@@ -27,6 +27,10 @@ pub fn create_backtrace() -> String {
 
 /// Outputs the backtrace as a human readable string.
 ///
+/// **Warning the formating for now is focused on calls from inside a panic
+/// hook, calling it from outside might not work as expected until more
+/// scenarios are covered and tested**
+///
 /// Note that this does some rust specific backtrace shortening, mainly
 /// some frames from the panic handling functionality are skipped over
 /// and some rust paths to crates get shortened.
