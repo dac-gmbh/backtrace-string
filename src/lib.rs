@@ -4,7 +4,7 @@
 //! to generate a backtrace and then converts it to a human readable string
 //! by demangleing names, doing some formating etc.
 //!
-//!
+//! Note that for this is meant to be used in panic hooks only.
 
 use {
     backtrace::{Backtrace, BacktraceFrame},
