@@ -120,6 +120,14 @@ fn filter_frames<'a>(frames: &'a [BacktraceFrame]) -> impl Iterator<Item = &'a B
         })
         .map(|(i, _)| i);
 
+    let start_index = start_index.and_then(|s| {
+        if end_index.as_ref().map(|e| s >= *e).unwrap_or(false) {
+            None
+        } else {
+            Some(s)
+        }
+    });
+
     frames
         .iter()
         .enumerate()
@@ -230,7 +238,7 @@ mod tests {
     fn backtrace_from_panic_hook(inner: impl FnOnce() + UnwindSafe) -> String {
         let result_cell = Arc::new(Mutex::new(None));
         let result_cell2 = result_cell.clone();
-        let hook = Box::new(move |panic_info: &PanicInfo| {
+        let hook = Box::new(move |_panic_info: &PanicInfo| {
             let out = crate::create_backtrace();
             *result_cell.lock().unwrap() = Some(out);
         });
@@ -275,6 +283,38 @@ mod tests {
                test::run_test::run_test_inner::{{closure}}::{@}
                 at src/libtest/lib.rs:{@}
         "#;
+        fuzzy_stacktrace_eq(expected_bt, bt);
+    }
+
+    #[test]
+    fn backtrace_outside_of_panic_hook() {
+        let bt = crate::create_backtrace();
+        assert!(bt.trim().len() > 0);
+    }
+
+    #[test]
+    fn instable_backtrace_outside_of_panic_hook() {
+        let bt = crate::create_backtrace();
+        let expected_bt = r#"
+            0: backtrace_string::create_backtrace::{@}
+                at src/lib.rs:{@}
+            1: backtrace_string::tests::instable_backtrace_outside_of_panic_hook::{@}
+                at src/lib.rs:{@}
+            2: backtrace_string::tests::instable_backtrace_outside_of_panic_hook::{{closure}}::{@}
+                at src/lib.rs:{@}
+            3: core::ops::function::FnOnce::call_once::{@}
+                at /rustc/{@}/src/libcore/ops/function.rs:{@}
+            4: <alloc::boxed::Box<F> as core::ops::function::FnOnce<A>>::call_once::{@}
+                at /rustc/{@}/src/liballoc/boxed.rs:{@}
+            5: __rust_maybe_catch_panic
+                at src/libpanic_unwind/lib.rs:{@}
+            6: std::panicking::try::{@}
+                at /rustc/{@}/src/libstd/panicking.rs:{@}
+               std::panic::catch_unwind::{@}
+                at /rustc/{@}/src/libstd/panic.rs:{@}
+               test::run_test::run_test_inner::{{closure}}::{@}
+                at src/libtest/lib.rs:{@}
+        "#;
 
         fuzzy_stacktrace_eq(expected_bt, bt);
     }
@@ -292,9 +332,6 @@ mod tests {
                 (None, Some(got)) => panic!("created backtrace has additional lines, starting with {:?}", got),
                 (None, None) => break
             };
-
-            dbg!(exp);
-            dbg!(got);
 
             for part in exp.split("{@}") {
                 if !got.starts_with(part) {
